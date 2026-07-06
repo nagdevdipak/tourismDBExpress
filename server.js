@@ -13,6 +13,9 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
+  app.get("/", (req, res) => {
+  res.send("Tourism API is running...");
+});
 // Routes
 app.use("/api/user", require("./Routs/UserRout"));
 app.use("/api/Service",require("./Routs/DSRouter"))

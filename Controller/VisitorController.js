@@ -39,6 +39,12 @@ exports.send_OTP = async (req, res) => {
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
     // transporter
+const dns = require("dns");
+
+dns.lookup("smtp.gmail.com", (err, address, family) => {
+  console.log("SMTP Address:", address, "IPv", family);
+});
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -47,10 +53,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
+  family: 4,
+  lookup: (hostname, options, callback) => {
+    return dns.lookup(hostname, { family: 4 }, callback);
+  },
 });
+
 await transporter.verify();
 console.log("SMTP verified");
     // send email

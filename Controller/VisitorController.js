@@ -7,8 +7,6 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-// ================= Send OTP =================
-
 exports.send_OTP = async (req, res) => {
   try {
 
@@ -38,16 +36,23 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
-
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
     // transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
+});
+await transporter.verify();
+console.log("SMTP verified");
     // send email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,

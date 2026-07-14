@@ -4,18 +4,31 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://your-frontend.onrender.com"
+  ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use('/Uploads',express.static('Uploads'))
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+  .catch(err => {
+  console.error("MongoDB Connection Error");
+  console.error(err);
+});
 
   app.get("/", (req, res) => {
   res.send("Tourism API is running...");
 });
+
+console.log(process.env.MONGO_URI);
 // Routes
 app.use("/api/user", require("./Routs/UserRout"));
 app.use("/api/Service",require("./Routs/DSRouter"))

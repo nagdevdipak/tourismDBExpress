@@ -2,12 +2,15 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
+const { Resend } = require("resend");
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
 exports.send_OTP = async (req, res) => {
+  
   try {
 
     const { email } = req.body;
@@ -36,39 +39,31 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+    
+console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
     // transporter
-const dns = require("dns");
 
-dns.lookup("smtp.gmail.com", (err, address, family) => {
-  console.log("SMTP Address:", address, "IPv", family);
+const { data, error } = await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: email,
+  subject: "Visitor OTP Verification",
+  html: `
+    <h2>Your OTP</h2>
+    <h1>${otp}</h1>
+    <p>This OTP expires in 5 minutes.</p>
+  `,
 });
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  family: 4,
-  lookup: (hostname, options, callback) => {
-    return dns.lookup(hostname, { family: 4 }, callback);
-  },
-});
+if (error) {
+  console.error(error);
 
-await transporter.verify();
-console.log("SMTP verified");
-    // send email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Visitor OTP Verification",
-      text: `Your OTP is ${otp}`
-    });
+  return res.status(500).json({
+    message: "Failed to send email",
+    error,
+  });
+}
 
+console.log("Resend Email:", data);
     console.log("OTP:", otp);
 
     return res.status(200).json({

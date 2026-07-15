@@ -44,7 +44,10 @@ exports.send_OTP = async (req, res) => {
 
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -55,11 +58,7 @@ const info = await transporter.sendMail({
   from: `"Tourism App" <${process.env.EMAIL_USER}>`,
   to: email,
   subject: "Visitor OTP Verification",
-  html: `
-    <h2>Your OTP Verification Code</h2>
-    <h1>${otp}</h1>
-    <p>This OTP expires in 5 minutes.</p>
-  `,
+   otp:`${otp}`
 });
 
 console.log("Email sent:", info.response);

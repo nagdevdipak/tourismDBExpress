@@ -41,18 +41,15 @@ exports.send_OTP = async (req, res) => {
     await visitor.save();
     // transporter
 
+
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
+  service: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  family: 4, // Force IPv4
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    family: 4,
-    rejectUnauthorized: false,
   },
 });
 

@@ -69,7 +69,7 @@ transporter.verify(function (error, success) {
 //    otp:`${otp}`
 // });
 
-console.log("Email sent:", info.response);
+// console.log("Email sent:", info.response);
     console.log("OTP:", otp);
 
     return res.status(200).json({

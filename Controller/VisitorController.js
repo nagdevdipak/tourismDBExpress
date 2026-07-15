@@ -43,15 +43,23 @@ exports.send_OTP = async (req, res) => {
 console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
     // transporter
 
-const { data, error } = await resend.emails.send({
-  from: "onboarding@resend.dev",
-  to: email,
-  subject: "Visitor OTP Verification",
-  html: `
-    <h2>Your OTP</h2>
-    <h1>${otp}</h1>
-    <p>This OTP expires in 5 minutes.</p>
-  `,
+// const { data, error } = await resend.emails.send({
+//   from: "onboarding@resend.dev",
+//   to: email,
+//   subject: "Visitor OTP Verification",
+//   html: `
+//     <h2>Your OTP</h2>
+//     <h1>${otp}</h1>
+//     <p>This OTP expires in 5 minutes.</p>
+//   `,
+// });
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 if (error) {

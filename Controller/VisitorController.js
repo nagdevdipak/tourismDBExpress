@@ -10,7 +10,7 @@ function generateOTP() {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
+  port: 465,
   secure: false,
   requireTLS: true,
   auth: {
@@ -58,13 +58,7 @@ exports.send_OTP = async (req, res) => {
     // transporter
 
 
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log(error);
-    } else {
-        console.log("SMTP Ready");
-    }
-});
+
 
 try {
   const info = await transporter.sendMail({

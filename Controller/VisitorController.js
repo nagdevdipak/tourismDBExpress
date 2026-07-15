@@ -3,7 +3,10 @@ const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
 const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first");
+
+dns.lookup("smtp.gmail.com", { family: 4 }, (err, address) => {
+  console.log(err, address);
+});
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
@@ -11,15 +14,12 @@ function generateOTP() {
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
-  secure: false,
-  requireTLS: true,
+  secure: true,
+  family: 4,          // Force IPv4
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 480000, // 2 minutes
-socketTimeout: 120000,
-greetingTimeout: 60000,
 });
 
 exports.send_OTP = async (req, res) => {

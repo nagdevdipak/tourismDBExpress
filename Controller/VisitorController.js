@@ -9,7 +9,9 @@ function generateOTP() {
 }
 
 exports.send_OTP = async (req, res) => {
-  
+   console.log("Method:", req.method);
+  console.log("Body:", req.body);
+
   try {
 
     const { email } = req.body;

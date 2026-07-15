@@ -2,21 +2,13 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000);
-}
-
-
 const { Resend } = require("resend");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-await resend.emails.send({
-  from: "Tourism App <onboarding@resend.dev>",
-  to: email,
-  subject: "Visitor OTP Verification",
-  text: `Your OTP is ${otp}`,
-});
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000);
+}
 
 
 
@@ -53,28 +45,17 @@ exports.send_OTP = async (req, res) => {
 
     await visitor.save();
 
-try {
-  const info = await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Visitor OTP Verification",
-    text: `Your OTP is ${otp}`,
-  });
-
-  console.log("Email sent:", info.response);
-
-  return res.status(200).json({
-    message: "OTP sent successfully",
-  });
-
-} catch (mailErr) {
-  console.error("MAIL ERROR:", mailErr);
-
-  return res.status(500).json({
-    message: "Failed to send email",
-    error: mailErr.message,
-  });
-}
+await resend.emails.send({
+  from: "Tourism App <onboarding@resend.dev>",
+  to: email,
+  subject: "Visitor OTP Verification",
+  html: `
+    <h2>Visitor OTP Verification</h2>
+    <p>Your OTP is:</p>
+    <h1>${otp}</h1>
+    <p>This OTP is valid for 5 minutes.</p>
+  `,
+});
     console.log("OTP:", otp);
 
     return res.status(200).json({

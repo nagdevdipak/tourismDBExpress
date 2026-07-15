@@ -6,28 +6,19 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-const dns = require("dns").promises;
 
-const { address } = await dns.lookup("smtp.gmail.com", {
-  family: 4,
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+await resend.emails.send({
+  from: "Tourism App <onboarding@resend.dev>",
+  to: email,
+  subject: "Visitor OTP Verification",
+  text: `Your OTP is ${otp}`,
 });
 
-const transporter = nodemailer.createTransport({
-  host: address,
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    servername: "smtp.gmail.com",
-  },
-});
 
-console.log("mail",user)
-console.log("pass",pass)
 
 exports.send_OTP = async (req, res) => {
    console.log("Method:", req.method);

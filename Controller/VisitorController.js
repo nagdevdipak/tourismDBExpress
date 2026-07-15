@@ -7,7 +7,7 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-const nodemailer = require("nodemailer");
+
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",

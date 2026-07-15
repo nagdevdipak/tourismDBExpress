@@ -2,9 +2,8 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
-// const { Resend } = require("resend");
-
-// const resend = new Resend(process.env.RESEND_API_KEY);
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
@@ -41,8 +40,6 @@ exports.send_OTP = async (req, res) => {
     await visitor.save();
 
     // transporter
-
-
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,

@@ -2,14 +2,23 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 exports.send_OTP = async (req, res) => {
   console.log("Request Method:", req.method);
@@ -18,7 +27,6 @@ exports.send_OTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validate email
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -26,26 +34,23 @@ exports.send_OTP = async (req, res) => {
       });
     }
 
-    // Generate OTP
     const otp = generateOTP();
 
-    // Find existing visitor or create a new one
     let visitor = await Visitor.findOne({ email });
 
     if (!visitor) {
       visitor = new Visitor({ email });
     }
 
-    // Update OTP details
     visitor.otp = otp;
-    visitor.otp_expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    visitor.otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
     visitor.is_verified = false;
 
     await visitor.save();
 
-    // Send OTP Email
-    const emailResponse = await resend.emails.send({
-      from: "Tourism App <onboarding@resend.dev>",
+    // Send OTP Email using Nodemailer
+    const info = await transporter.sendMail({
+      from: `"Tourism App" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Visitor OTP Verification",
       html: `
@@ -59,7 +64,7 @@ exports.send_OTP = async (req, res) => {
       `,
     });
 
-    console.log("Resend Response:", emailResponse);
+    console.log("Email Sent:", info.response);
 
     return res.status(200).json({
       success: true,
@@ -76,7 +81,6 @@ exports.send_OTP = async (req, res) => {
     });
   }
 };
-
 // ================= Verify OTP =================
 
 exports.verifyOTP = async (req, res) => {

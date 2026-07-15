@@ -39,8 +39,6 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
-    
-console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
     // transporter
 
 

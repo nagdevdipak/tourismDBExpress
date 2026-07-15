@@ -51,7 +51,18 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const info = await transporter.sendMail({
+  from: `"Tourism App" <${process.env.EMAIL_USER}>`,
+  to: email,
+  subject: "Visitor OTP Verification",
+  html: `
+    <h2>Your OTP Verification Code</h2>
+    <h1>${otp}</h1>
+    <p>This OTP expires in 5 minutes.</p>
+  `,
+});
 
+console.log("Email sent:", info.response);
     console.log("OTP:", otp);
 
     return res.status(200).json({

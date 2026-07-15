@@ -8,6 +8,20 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  connectionTimeout: 480000, // 2 minutes
+socketTimeout: 120000,
+greetingTimeout: 60000,
+});
+
 exports.send_OTP = async (req, res) => {
    console.log("Method:", req.method);
   console.log("Body:", req.body);
@@ -42,19 +56,7 @@ exports.send_OTP = async (req, res) => {
     await visitor.save();
 
     // transporter
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 480000, // 2 minutes
-socketTimeout: 120000,
-greetingTimeout: 60000,
-});
+
 
 transporter.verify(function (error, success) {
     if (error) {

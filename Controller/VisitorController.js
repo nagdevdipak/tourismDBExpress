@@ -10,8 +10,6 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-
-
 exports.send_OTP = async (req, res) => {
    console.log("Method:", req.method);
   console.log("Body:", req.body);
@@ -44,8 +42,8 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
-
-await resend.emails.send({
+    
+const result = await resend.emails.send({
   from: "Tourism App <onboarding@resend.dev>",
   to: email,
   subject: "Visitor OTP Verification",
@@ -56,7 +54,8 @@ await resend.emails.send({
     <p>This OTP is valid for 5 minutes.</p>
   `,
 });
-    console.log("OTP:", otp);
+
+console.log("Resend Response:", result);
 
     return res.status(200).json({
       message: "OTP sent successfully"

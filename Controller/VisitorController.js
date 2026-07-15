@@ -64,14 +64,14 @@ transporter.verify(function (error, success) {
     }
 });
 
-// const info = await transporter.sendMail({
-//   from: `"Tourism App" <${process.env.EMAIL_USER}>`,
-//   to: email,
-//   subject: "Visitor OTP Verification",
-//    otp:`${otp}`
-// });
+const info = await transporter.sendMail({
+  from:process.env.EMAIL_USER,
+  to: email,
+  subject: "Visitor OTP Verification",
+  text:`${otp}`
+});
 
-// console.log("Email sent:", info.response);
+console.log("Email sent:", info.response);
     console.log("OTP:", otp);
 
     return res.status(200).json({

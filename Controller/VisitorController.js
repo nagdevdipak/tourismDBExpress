@@ -51,6 +51,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("SMTP Ready");
+    }
+});
+
 const info = await transporter.sendMail({
   from: `"Tourism App" <${process.env.EMAIL_USER}>`,
   to: email,

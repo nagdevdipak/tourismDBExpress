@@ -2,9 +2,9 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
-const { Resend } = require("resend");
+// const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }

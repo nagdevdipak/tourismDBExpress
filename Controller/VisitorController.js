@@ -62,6 +62,9 @@ try {
     `,
   });
 
+  console.log("Message ID:", info.messageId);
+console.log("Response:", info.response);
+
   console.log("Email sent successfully:", info.response);
 } catch (mailError) {
   console.error("MAIL ERROR:", mailError);

@@ -10,64 +10,69 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
+
 exports.send_OTP = async (req, res) => {
-   console.log("Method:", req.method);
-  console.log("Body:", req.body);
+  console.log("Request Method:", req.method);
+  console.log("Request Body:", req.body);
 
   try {
-
     const { email } = req.body;
 
+    // Validate email
     if (!email) {
       return res.status(400).json({
-        message: "Email is required"
+        success: false,
+        message: "Email is required",
       });
     }
 
+    // Generate OTP
     const otp = generateOTP();
 
-    // find existing visitor
+    // Find existing visitor or create a new one
     let visitor = await Visitor.findOne({ email });
 
-    // create temporary visitor if not exists
     if (!visitor) {
-      visitor = new Visitor({
-        email
-      });
+      visitor = new Visitor({ email });
     }
 
-    // update otp details
+    // Update OTP details
     visitor.otp = otp;
-    visitor.otp_expiry = Date.now() + 5 * 60 * 1000;
+    visitor.otp_expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
     visitor.is_verified = false;
 
     await visitor.save();
-    
-const result = await resend.emails.send({
-  from: "Tourism App <onboarding@resend.dev>",
-  to: email,
-  subject: "Visitor OTP Verification",
-  html: `
-    <h2>Visitor OTP Verification</h2>
-    <p>Your OTP is:</p>
-    <h1>${otp}</h1>
-    <p>This OTP is valid for 5 minutes.</p>
-  `,
-});
 
-console.log("Resend Response:", result);
-
-    return res.status(200).json({
-      message: "OTP sent successfully"
+    // Send OTP Email
+    const emailResponse = await resend.emails.send({
+      from: "Tourism App <onboarding@resend.dev>",
+      to: email,
+      subject: "Visitor OTP Verification",
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Visitor OTP Verification</h2>
+          <p>Your One-Time Password (OTP) is:</p>
+          <h1 style="color:#0d6efd;">${otp}</h1>
+          <p>This OTP is valid for <strong>5 minutes</strong>.</p>
+          <p>If you didn't request this OTP, you can safely ignore this email.</p>
+        </div>
+      `,
     });
 
-  } catch (err) {
+    console.log("Resend Response:", emailResponse);
 
-    console.error("SEND OTP ERROR:", err);
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+
+  } catch (error) {
+    console.error("SEND OTP ERROR:", error);
 
     return res.status(500).json({
-      message: "Server Error",
-      error: err.message
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message,
     });
   }
 };

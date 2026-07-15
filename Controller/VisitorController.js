@@ -43,7 +43,7 @@ exports.send_OTP = async (req, res) => {
 
 
 const transporter = nodemailer.createTransport({
-  host: "gmail",
+  host: "smtp.gmail.com",
   port: 465,
   secure: true,
   family: 4, // Force IPv4

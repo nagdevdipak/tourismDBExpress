@@ -85,11 +85,25 @@ app.get("/smtp-test", async (req, res) => {
 
       await new Promise((resolve, reject) => {
 
-        const socket = net.connect({
-          host: ip,
-          port: 587,
-          timeout: 10000
-        });
+      const socket = net.connect({
+    host: address,
+    port: 587,
+    timeout: 10000,
+});
+
+socket.on("lookup", (...args) => console.log("lookup", args));
+
+socket.on("connect", () => console.log("CONNECTED"));
+
+socket.on("ready", () => console.log("READY"));
+
+socket.on("timeout", () => console.log("TIMEOUT"));
+
+socket.on("close", hadError => console.log("CLOSE", hadError));
+
+socket.on("end", () => console.log("END"));
+
+socket.on("error", err => console.log(err));
 
         socket.on("connect", () => {
           console.log(ip, "CONNECTED");

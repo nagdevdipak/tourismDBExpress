@@ -48,7 +48,11 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
+await transporter.verify();
+console.log("SMTP verified");
     // Send OTP Email using Nodemailer
     const info = await transporter.sendMail({
       from: `"Tourism App" <${process.env.EMAIL_USER}>`,

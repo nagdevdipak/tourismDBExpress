@@ -7,36 +7,75 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  tls: { servername: "smtp.gmail.com" },
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+
+  connectionTimeout: 60000,
+  greetingTimeout: 60000,
+  socketTimeout: 60000,
+  logger: true,
+  debug: true,
+});
+
+console.log("TRANSPORTER CONFIG");
+console.log({
+  host: transporter.options.host,
+  port: transporter.options.port,
+  secure: transporter.options.secure,
+});
+
 exports.send_OTP = async (req, res) => {
+  console.log("Request Method:", req.method);
+  console.log("Request Body:", req.body);
+
   try {
-    const { address } = await dns.promises.lookup("smtp.gmail.com", {
-      family: 4,
-    });
+    const { email } = req.body;
 
-    console.log("Using SMTP IPv4:", address);
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
 
-    const transporter = nodemailer.createTransport({
-      host: address,
-      port: 587,
-      secure: false,
-      requireTLS: true,
+    const otp = generateOTP();
 
-      tls: {
-        servername: "smtp.gmail.com",
-      },
+    let visitor = await Visitor.findOne({ email });
 
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+    if (!visitor) {
+      visitor = new Visitor({ email });
+    }
 
-      logger: true,
-      debug: true,
-    });
+    visitor.otp = otp;
+    visitor.otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
+    visitor.is_verified = false;
 
-    await transporter.verify();
+    await visitor.save();
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
-       const info = await transporter.sendMail({
+try {
+  await transporter.verify();
+  console.log("SMTP Connected");
+} catch (err) {
+  console.error("SMTP Verify Error:", err);
+  return res.status(500).json({
+    success: false,
+    error: err.message,
+  });
+}
+
+    // Send OTP Email using Nodemailer
+    const info = await transporter.sendMail({
       from: `"Tourism App" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Visitor OTP Verification",
@@ -52,20 +91,22 @@ exports.send_OTP = async (req, res) => {
     });
 
     console.log("Email Sent:", info.response);
-    console.log("TRANSPORTER CONFIG");
-console.log({
-  host: transporter.options.host,
-  port: transporter.options.port,
-  secure: transporter.options.secure,
-});
-  } catch (err) {
-    console.error(err);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+
+  } catch (error) {
+    console.error("SEND OTP ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message,
+    });
   }
 };
-
-
-
-
 // ================= Verify OTP =================
 
 exports.verifyOTP = async (req, res) => {

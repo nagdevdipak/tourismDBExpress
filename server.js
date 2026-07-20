@@ -3,6 +3,39 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const net = require("net");
+
+const socket = net.connect(587, "smtp.gmail.com");
+
+socket.setTimeout(15000);
+
+socket.on("connect", () => {
+  console.log("TCP Connected to smtp.gmail.com:587");
+  socket.end();
+});
+
+socket.on("timeout", () => {
+  console.log("TCP Connection Timeout");
+  socket.destroy();
+});
+
+socket.on("error", (err) => {
+  console.log("TCP Error:", err);
+});
+
+const tls = require("tls");
+
+const socket1 = tls.connect({
+  host: "smtp.gmail.com",
+  port: 465,
+  servername: "smtp.gmail.com",
+}, () => {
+  console.log("TLS Connected");
+  socket1.end();
+});
+
+socket1.on("error", console.error);
+
 const app = express();
 app.use(cors({
   origin: [
@@ -17,8 +50,16 @@ app.use(cors({
 //  app.use(cors())
 const dns = require("dns");
 
-// Force Node.js to use public DNS servers
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+dns.lookup("smtp.gmail.com", (err, address, family) => {
+  if (err) {
+    console.error("DNS Lookup Error:", err);
+  } else {
+    console.log("smtp.gmail.com resolved to:", address);
+    console.log("IP Family:", family === 4 ? "IPv4" : "IPv6");
+  }
+});
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
@@ -28,10 +69,13 @@ app.use('/Uploads',express.static('Uploads'))
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch(err => {
+  .catch(error => {
   console.error("MongoDB Connection Error");
-  console.error(err)
-  console.error(err.stack)
+console.error("Name:", error.name);
+console.error("Code:", error.code);
+console.error("Command:", error.command);
+console.error("Message:", error.message);
+console.error("Stack:", error.stack);
 });
 
   app.get("/", (req, res) => {

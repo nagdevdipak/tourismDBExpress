@@ -21,6 +21,9 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 60000,
   greetingTimeout: 60000,
   socketTimeout: 60000,
+
+  logger: true,
+  debug: true,
 });
 
 exports.send_OTP = async (req, res) => {

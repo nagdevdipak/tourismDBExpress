@@ -26,6 +26,13 @@ const transporter = nodemailer.createTransport({
   debug: true,
 });
 
+console.log("TRANSPORTER CONFIG");
+console.log({
+  host: transporter.options.host,
+  port: transporter.options.port,
+  secure: transporter.options.secure,
+});
+
 exports.send_OTP = async (req, res) => {
   console.log("Request Method:", req.method);
   console.log("Request Body:", req.body);

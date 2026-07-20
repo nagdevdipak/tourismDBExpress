@@ -9,16 +9,18 @@ function generateOTP() {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  requireTLS: true,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-    connectionTimeout: 120000,
-  greetingTimeout: 120000,
-  socketTimeout: 120000,
-  requireTLS:true
+
+  connectionTimeout: 60000,
+  greetingTimeout: 60000,
+  socketTimeout: 60000,
 });
 
 exports.send_OTP = async (req, res) => {

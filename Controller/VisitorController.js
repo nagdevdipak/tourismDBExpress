@@ -92,7 +92,6 @@ await new Promise((resolve, reject) => {
   });
 });
 
-    await transporter.verify();
 
     console.log("SMTP VERIFY SUCCESS");
 

@@ -2,7 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const dns = require("dns");
 
+dns.setDefaultResultOrder("ipv4first");
 const net = require("net");
 
 const socket = net.connect(587, "smtp.gmail.com");
@@ -48,7 +50,6 @@ app.use(cors({
 }));
 
 //  app.use(cors())
-const dns = require("dns");
 
 dns.lookup("smtp.gmail.com", (err, address, family) => {
   if (err) {

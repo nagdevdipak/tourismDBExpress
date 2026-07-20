@@ -11,7 +11,7 @@ function generateOTP() {
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false,
+  secure: true,
   requireTLS: true,
   tls: { servername: "smtp.gmail.com" },
   auth: {
@@ -63,16 +63,7 @@ exports.send_OTP = async (req, res) => {
     console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
-try {
-  await transporter.verify();
-  console.log("SMTP Connected");
-} catch (err) {
-  console.error("SMTP Verify Error:", err);
-  return res.status(500).json({
-    success: false,
-    error: err.message,
-  });
-}
+
 
     // Send OTP Email using Nodemailer
     const info = await transporter.sendMail({

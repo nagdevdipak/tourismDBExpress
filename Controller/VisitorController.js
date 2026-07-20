@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const dns = require("dns");
 const Visitor = require("../Model/visitorRegistrationForm");
-// const VisitsStats = require("../Model/visitsStats")
+ const VisitsStats = require("../Model/visitsStats")
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }

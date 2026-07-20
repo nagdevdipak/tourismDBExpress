@@ -11,14 +11,14 @@ function generateOTP() {
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: true,
+  secure: false,
   requireTLS: true,
   tls: { servername: "smtp.gmail.com" },
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-
+dns:{getDefaultAutoSelectFamily:4},
   connectionTimeout: 60000,
   greetingTimeout: 60000,
   socketTimeout: 60000,
@@ -89,7 +89,14 @@ console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
     });
 
   } catch (error) {
-    console.error("SEND OTP ERROR:", error);
+   console.error("SEND OTP ERROR");
+console.error("Name:", error.name);
+console.error("Code:", error.code);
+console.error("Command:", error.command);
+console.error("Address:", error.address);
+console.error("Port:", error.port);
+console.error("Response:", error.response);
+console.error("Stack:", error.stack);
 
     return res.status(500).json({
       success: false,
@@ -358,6 +365,7 @@ exports.getVisitor = async (req, res) => {
 };
 
 const mongoose = require("mongoose");
+const { getDefaultAutoSelectFamily } = require("net");
 
 exports.deleteVisitor = async (req, res) => {
   try {

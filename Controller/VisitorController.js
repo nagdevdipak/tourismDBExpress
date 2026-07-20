@@ -68,29 +68,31 @@ exports.send_OTP = async (req, res) => {
     const net = require("net");
 
 await new Promise((resolve, reject) => {
-  const socket = net.connect({
-    host: address,
-    port: 587,
-    timeout: 10000,
-  });
+    const socket = net.connect({
+        host: address,
+        port: 587,
+        timeout: 10000
+    });
 
-  socket.on("connect", () => {
-    console.log("TCP CONNECT SUCCESS");
-    socket.destroy();
-    resolve();
-  });
+    socket.on("connect", () => {
+        console.log("TCP CONNECT SUCCESS");
+        socket.destroy();
+        resolve();
+    });
 
-  socket.on("timeout", () => {
-    console.log("TCP TIMEOUT");
-    socket.destroy();
-    reject(new Error("TCP Timeout"));
-  });
+    socket.on("timeout", () => {
+        socket.destroy();
+        reject(new Error("TCP Timeout"));
+    });
 
-  socket.on("error", (err) => {
-    console.log("TCP ERROR", err);
-    reject(err);
-  });
+    socket.on("error", reject);
 });
+
+console.log("TCP TEST PASSED");
+
+await transporter.verify();
+
+console.log("SMTP VERIFY SUCCESS");
 
 
     console.log("SMTP VERIFY SUCCESS");

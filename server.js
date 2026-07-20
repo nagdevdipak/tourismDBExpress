@@ -15,6 +15,10 @@ app.use(cors({
 }));
 
 //  app.use(cors())
+const dns = require("dns");
+
+// Force Node.js to use public DNS servers
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
@@ -26,7 +30,8 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => {
   console.error("MongoDB Connection Error");
-  console.error(err);
+  console.error(err)
+  console.error(err.stack)
 });
 
   app.get("/", (req, res) => {

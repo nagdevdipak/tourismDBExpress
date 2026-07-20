@@ -15,6 +15,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+    connectionTimeout: 120000,
+  greetingTimeout: 120000,
+  socketTimeout: 120000,
+  requireTLS:true
 });
 
 exports.send_OTP = async (req, res) => {

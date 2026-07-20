@@ -1,41 +1,16 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 const Visitor = require("../Model/visitorRegistrationForm");
-const VisitsStats = require("../Model/visitsStats")
-// ================= OTP Generator =================
-const dns = require("dns")
+
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  tls: { servername: "smtp.gmail.com" },
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-dns:{getDefaultAutoSelectFamily:4},
-  connectionTimeout: 60000,
-  greetingTimeout: 60000,
-  socketTimeout: 60000,
-  logger: true,
-  debug: true,
-});
-
-console.log("TRANSPORTER CONFIG");
-console.log({
-  host: transporter.options.host,
-  port: transporter.options.port,
-  secure: transporter.options.secure,
-});
-
 exports.send_OTP = async (req, res) => {
-  console.log("Request Method:", req.method);
-  console.log("Request Body:", req.body);
+  console.log("========================================");
+  console.log("SEND OTP REQUEST");
+  console.log("Method:", req.method);
+  console.log("Body:", req.body);
 
   try {
     const { email } = req.body;
@@ -46,6 +21,53 @@ exports.send_OTP = async (req, res) => {
         message: "Email is required",
       });
     }
+
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
+    // Resolve ONLY IPv4
+    const { address } = await dns.promises.lookup("smtp.gmail.com", {
+      family: 4,
+    });
+
+    console.log("========================================");
+    console.log("Resolved IPv4:", address);
+
+    const transporter = nodemailer.createTransport({
+      host: address,              // connect directly to IPv4
+      port: 587,
+      secure: false,              // STARTTLS
+      requireTLS: true,
+
+      tls: {
+        servername: "smtp.gmail.com", // certificate validation
+      },
+
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+
+      connectionTimeout: 60000,
+      greetingTimeout: 60000,
+      socketTimeout: 60000,
+
+      logger: true,
+      debug: true,
+    });
+
+    console.log("TRANSPORTER");
+    console.log({
+      host: transporter.options.host,
+      port: transporter.options.port,
+      secure: transporter.options.secure,
+    });
+
+    console.log("Verifying SMTP...");
+
+    await transporter.verify();
+
+    console.log("SMTP VERIFY SUCCESS");
 
     const otp = generateOTP();
 
@@ -60,28 +82,22 @@ exports.send_OTP = async (req, res) => {
     visitor.is_verified = false;
 
     await visitor.save();
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
+    console.log("Sending Email...");
 
-
-    // Send OTP Email using Nodemailer
     const info = await transporter.sendMail({
       from: `"Tourism App" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Visitor OTP Verification",
       html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Visitor OTP Verification</h2>
-          <p>Your One-Time Password (OTP) is:</p>
-          <h1 style="color:#0d6efd;">${otp}</h1>
-          <p>This OTP is valid for <strong>5 minutes</strong>.</p>
-          <p>If you didn't request this OTP, you can safely ignore this email.</p>
-        </div>
+        <h2>Visitor OTP Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
       `,
     });
 
-    console.log("Email Sent:", info.response);
+    console.log("MAIL SENT");
+    console.log(info);
 
     return res.status(200).json({
       success: true,
@@ -89,14 +105,20 @@ console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
     });
 
   } catch (error) {
-   console.error("SEND OTP ERROR");
-console.error("Name:", error.name);
-console.error("Code:", error.code);
-console.error("Command:", error.command);
-console.error("Address:", error.address);
-console.error("Port:", error.port);
-console.error("Response:", error.response);
-console.error("Stack:", error.stack);
+    console.log("========================================");
+    console.log("SMTP ERROR");
+
+    console.log("Name:", error.name);
+    console.log("Code:", error.code);
+    console.log("Command:", error.command);
+    console.log("Address:", error.address);
+    console.log("Port:", error.port);
+    console.log("Response:", error.response);
+    console.log("ResponseCode:", error.responseCode);
+    console.log("Message:", error.message);
+
+    console.log("Full Error");
+    console.dir(error, { depth: null });
 
     return res.status(500).json({
       success: false,

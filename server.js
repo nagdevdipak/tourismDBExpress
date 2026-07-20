@@ -64,6 +64,60 @@ dns.lookup("smtp.gmail.com", (err, address, family) => {
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+
+
+app.get("/smtp-test", async (req, res) => {
+
+  const ips = [
+    "74.125.142.108",
+    "74.125.195.108",
+    "74.125.199.108",
+    "142.250.99.108"
+  ];
+
+  const results = [];
+
+  for (const ip of ips) {
+
+    console.log("Testing", ip);
+
+    try {
+
+      await new Promise((resolve, reject) => {
+
+        const socket = net.connect({
+          host: ip,
+          port: 587,
+          timeout: 10000
+        });
+
+        socket.on("connect", () => {
+          console.log(ip, "CONNECTED");
+          results.push({ ip, status: "CONNECTED" });
+          socket.destroy();
+          resolve();
+        });
+
+        socket.on("timeout", () => {
+          console.log(ip, "TIMEOUT");
+          results.push({ ip, status: "TIMEOUT" });
+          socket.destroy();
+          reject(new Error("TIMEOUT"));
+        });
+
+        socket.on("error", (err) => {
+          console.log(ip, err.message);
+          results.push({ ip, status: err.message });
+          reject(err);
+        });
+
+      });
+
+    } catch (e) {}
+  }
+
+  res.json(results);
+});
 app.use('/Uploads',express.static('Uploads'))
 
 

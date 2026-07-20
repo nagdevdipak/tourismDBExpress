@@ -48,9 +48,9 @@ exports.send_OTP = async (req, res) => {
         pass: process.env.EMAIL_PASS,
       },
 
-      connectionTimeout: 60000,
-      greetingTimeout: 60000,
-      socketTimeout: 60000,
+      connectionTimeout: 120000,
+      greetingTimeout: 120000,
+      socketTimeout: 120000,
 
       logger: true,
       debug: true,
@@ -64,6 +64,33 @@ exports.send_OTP = async (req, res) => {
     });
 
     console.log("Verifying SMTP...");
+
+    const net = require("net");
+
+await new Promise((resolve, reject) => {
+  const socket = net.connect({
+    host: address,
+    port: 587,
+    timeout: 10000,
+  });
+
+  socket.on("connect", () => {
+    console.log("TCP CONNECT SUCCESS");
+    socket.destroy();
+    resolve();
+  });
+
+  socket.on("timeout", () => {
+    console.log("TCP TIMEOUT");
+    socket.destroy();
+    reject(new Error("TCP Timeout"));
+  });
+
+  socket.on("error", (err) => {
+    console.log("TCP ERROR", err);
+    reject(err);
+  });
+});
 
     await transporter.verify();
 

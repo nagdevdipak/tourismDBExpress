@@ -2,17 +2,25 @@ const nodemailer = require("nodemailer");
 const Visitor = require("../Model/visitorRegistrationForm");
 const VisitsStats = require("../Model/visitsStats")
 // ================= OTP Generator =================
-
+const dns = require("dns")
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
+const { address } =  dns.promises.lookup("smtp.gmail.com", {
+  family: 4,
+})
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: address,
   port: 587,
   secure: false,
   requireTLS: true,
 
+  host: address,
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  tls: { servername: "smtp.gmail.com" },
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -21,7 +29,6 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 60000,
   greetingTimeout: 60000,
   socketTimeout: 60000,
-
   logger: true,
   debug: true,
 });

@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const dns = require("dns");
-
+dns.setServers([
+  "8.8.8.8",
+  "1.1.1.1"
+]);
 dns.setDefaultResultOrder("ipv4first");
 const net = require("net");
 
@@ -27,16 +30,6 @@ socket.on("error", (err) => {
 
 const tls = require("tls");
 
-const socket1 = tls.connect({
-  host: "smtp.gmail.com",
-  port: 465,
-  servername: "smtp.gmail.com",
-}, () => {
-  console.log("TLS Connected");
-  socket1.end();
-});
-
-socket1.on("error", console.error);
 
 const app = express();
 app.use(cors({
@@ -64,7 +57,30 @@ dns.lookup("smtp.gmail.com", (err, address, family) => {
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+app.get("/tcp-test", async (req, res) => {
+  const net = require("net");
 
+  const socket = net.connect({
+    host: "74.125.195.108",
+    port: 587,
+  });
+
+  socket.setTimeout(10000);
+
+  socket.on("connect", () => {
+    socket.destroy();
+    res.send("CONNECTED");
+  });
+
+  socket.on("timeout", () => {
+    socket.destroy();
+    res.send("TIMEOUT");
+  });
+
+  socket.on("error", (err) => {
+    res.json(err);
+  });
+});
 
 app.get("/smtp-test", async (req, res) => {
 
@@ -85,10 +101,10 @@ app.get("/smtp-test", async (req, res) => {
 
       await new Promise((resolve, reject) => {
 
-      const socket = net.connect({
-    host: address,
-    port: 587,
-    timeout: 10000,
+ const socket = net.connect({
+  host: ip,
+  port: 587,
+  timeout: 10000,
 });
 
 socket.on("lookup", (...args) => console.log("lookup", args));

@@ -10,24 +10,6 @@ dns.setServers([
 dns.setDefaultResultOrder("ipv4first");
 const net = require("net");
 
-const socket = net.connect(587, "smtp.gmail.com");
-
-socket.setTimeout(15000);
-
-socket.on("connect", () => {
-  console.log("TCP Connected to smtp.gmail.com:587");
-  socket.end();
-});
-
-socket.on("timeout", () => {
-  console.log("TCP Connection Timeout");
-  socket.destroy();
-});
-
-socket.on("error", (err) => {
-  console.log("TCP Error:", err);
-});
-
 const tls = require("tls");
 
 
@@ -109,11 +91,11 @@ app.get("/smtp-test", async (req, res) => {
 
 socket.on("lookup", (...args) => console.log("lookup", args));
 
-socket.on("connect", () => console.log("CONNECTED"));
+// socket.on("connect", () => console.log("CONNECTED"));
 
 socket.on("ready", () => console.log("READY"));
 
-socket.on("timeout", () => console.log("TIMEOUT"));
+// socket.on("timeout", () => console.log("TIMEOUT"));
 
 socket.on("close", hadError => console.log("CLOSE", hadError));
 

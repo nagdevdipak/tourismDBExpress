@@ -3,11 +3,25 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const dns = require("dns");
-dns.setServers([
-  "8.8.8.8",
-  "1.1.1.1"
-]);
+
 dns.setDefaultResultOrder("ipv4first");
+ dns.setServers(["8.8.8.8", "1.1.1.1"]);
+// Don't call dns.setServers()
+const resolver = new dns.Resolver();
+
+console.log("System DNS Servers:", resolver.getServers());
+
+
+console.log("Custom DNS Servers:", resolver.getServers());
+dns.lookup("smtp.gmail.com", { family: 4 }, (err, address) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log("SMTP IPv4:", address);
+});
+
 const net = require("net");
 
 const tls = require("tls");

@@ -95,8 +95,6 @@ await transporter.verify();
 console.log("SMTP VERIFY SUCCESS");
 
 
-    console.log("SMTP VERIFY SUCCESS");
-
     const otp = generateOTP();
 
     let visitor = await Visitor.findOne({ email });

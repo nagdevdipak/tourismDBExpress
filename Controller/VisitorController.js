@@ -32,16 +32,17 @@ exports.send_OTP = async (req, res) => {
 
     console.log("========================================");
     console.log("Resolved IPv4:", address);
+    console.log("1. Creating transporter");
 
     const transporter = nodemailer.createTransport({
-      host: address,              // connect directly to IPv4
+    host: "smtp.gmail.com",// connect directly to IPv4
       port: 587,
       secure: false,              // STARTTLS
       requireTLS: true,
 
-      tls: {
-        servername: "smtp.gmail.com", // certificate validation
-      },
+      // tls: {
+      //   servername: "smtp.gmail.com", // certificate validation
+      // },
 
       auth: {
         user: process.env.EMAIL_USER,
@@ -64,14 +65,16 @@ exports.send_OTP = async (req, res) => {
     });
 
     console.log("Verifying SMTP...");
+console.log("2. Transporter created");
 
+console.log("3. Starting TCP test");
     const net = require("net");
 
 await new Promise((resolve, reject) => {
     const socket = net.connect({
         host: address,
         port: 587,
-        timeout: 10000
+        timeout: 60000
     });
 
     socket.on("connect", () => {
@@ -88,10 +91,24 @@ await new Promise((resolve, reject) => {
     socket.on("error", reject);
 });
 
+
 console.log("TCP TEST PASSED");
+const socket = require("tls").connect({
+    host: "smtp.gmail.com",
+    port: 587,
+    servername: "smtp.gmail.com"
+});
 
+socket.on("secureConnect", () => {
+    console.log("TLS Connected");
+});
+
+socket.on("error", console.error);
+console.log("4. TCP test passed");
+
+console.log("5. Calling transporter.verify()");
 await transporter.verify();
-
+console.log("6. transporter.verify() completed");
 console.log("SMTP VERIFY SUCCESS");
 
 
